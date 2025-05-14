@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Backpack Manager
+
+A modern web application for managing your backpack collection. Built with Next.js, TypeScript, and TailwindCSS.
+
+![Backpack Manager Screenshot](https://via.placeholder.com/800x400?text=Backpack+Manager)
+
+## Features
+
+- **Add New Backpacks**: Add backpacks with details like name, brand, material, and weight
+- **View All Backpacks**: See all your backpacks in a responsive grid layout
+- **Edit and Delete**: Update or remove backpacks as needed
+- **Filter and Sort**: Find backpacks by name, brand, or filter by material
+- **Data Validation**: Form validation ensures data integrity
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+
+## Technology Stack
+
+- **Next.js**: React framework with server-side rendering
+- **TypeScript**: Type-safe JavaScript
+- **TailwindCSS**: Utility-first CSS framework for styling
+- **React Icons**: For beautiful icons
+- **UUID**: For generating unique IDs
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18.0 or later
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/your-username/backpack-manager.git
+cd backpack-manager
+```
+
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Adding a Backpack
 
-## Learn More
+1. Click the "Add Backpack" button in the header
+2. Fill in the required fields (name, brand, material, weight)
+3. Click "Add Backpack" to save
 
-To learn more about Next.js, take a look at the following resources:
+### Editing a Backpack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Find the backpack you want to edit
+2. Click the edit icon (pencil)
+3. Update the information
+4. Click "Update Backpack" to save changes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Deleting a Backpack
 
-## Deploy on Vercel
+1. Find the backpack you want to delete
+2. Click the delete icon (trash)
+3. Confirm deletion in the pop-up dialog
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Filtering and Sorting
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Use the search box to filter backpacks by name or brand
+- Use the material dropdown to filter by material type
+- Use the sort dropdown to order backpacks by different criteria
+- Click the sort direction button to toggle between ascending and descending order
+
+## Implementation Notes
+
+This implementation uses in-memory storage for the backpack data. In a real application, this would be replaced with actual API calls to a backend server. The mock data store simulates CRUD operations that would typically interact with a database.
+
+## License
+
+MIT
