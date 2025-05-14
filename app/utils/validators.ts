@@ -3,7 +3,9 @@ import { BackpackFormData } from '../models/backpack';
 export type ValidationError = {
   [key in keyof BackpackFormData]?: string;
 };
-
+export function isNumber(numStr: string) {
+  return !isNaN(parseFloat(numStr)) && !isNaN(+numStr);
+}
 export const validateBackpackForm = (data: Partial<BackpackFormData>): ValidationError => {
   const errors: ValidationError = {};
 

@@ -7,6 +7,7 @@ import { backpackStore } from './models/store';
 import { CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
+import { error } from 'console';
 
 export default function Home() {
   const [backpacks, setBackpacks] = useState<Backpack[]>([]);
