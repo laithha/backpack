@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
     try {
       const body = await request.json();
-      const { name, brand, material, weight, createdAt, manufactureId } = body;
-
+      const { name, brand, material, weight, manufactureId } = body;
+      const createdAt = "2025-05-14T16:39:33.845Z";
       if (!name || !brand || !material || !weight || name.length < 3 || !isNumber(weight) || !isNumber(manufactureId)) {
         return NextResponse.json(
           { error: 'Bad request: Either null fields or invalid data' },

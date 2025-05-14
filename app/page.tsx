@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Backpack, BackpackFormData } from './models/backpack';
@@ -8,6 +7,8 @@ import { CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { error } from 'console';
+import { parse } from 'path';
+import { handleAddBackpack } from '@/helpers/helpers';
 
 export default function Home() {
   const [backpacks, setBackpacks] = useState<Backpack[]>([]);
@@ -16,6 +17,7 @@ export default function Home() {
   const [material, setMaterial] = useState("");
   const [weight, setWeight] = useState("");
   const [color, setColor] = useState("");
+  const [manufactureId, setManufactureId] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -90,41 +92,28 @@ export default function Home() {
     }
   };
 
-  const handleAdd = () => {
-    if(!isNumber(weight)){
-      toast.error("Weight must be a number!");
-      return;
+  const handleAdd = async () => {
+    try{
+        console.log("hello1")
+        const newBackpack = await handleAddBackpack(
+            name,
+            brand,
+            material,
+            parseFloat(weight),
+            color,
+            parseInt(manufactureId)
+        )
+        console.log("hello2")
+        if(!newBackpack){
+            toast.error("Failed to add a backpack")
+            return;
+        }
+        console.log("hello3")
     }
-    if(name.length < 3){
-      toast.error("The name is too short! It must be at least 3 letters");
-      return;
+    catch(error:any){
+        console.log("error message", error.message)
     }
-    if(brand.length < 3){
-      toast.error("The brand is too short, it must be at least 3 letters");
-      return;
-    }
-    if(material.length < 3){
-      toast.error("The material is too short, it must be at least 3 letters");
-      return;
-    }
-
-    const newBackpack: BackpackFormData = {
-      name,
-      brand,
-      material,
-      weight: Number(weight)
-    };
-
-    backpackStore.addBackpack(newBackpack);
-    loadBackpacks();
-    setName("");
-    setBrand("");
-    setMaterial("");
-    setWeight("");
-    setColor("");
-    setShowAddModal(false);
-    toast.success(`${name} added successfully!`);
-  };
+};
 
   const handleDeleteBackpack = () => {
     if (selectedBackpack) {
@@ -353,6 +342,13 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
+            <input type='text' value={manufactureId} onChange={(e) => setManufactureId(e.target.value)} placeholder='manufatureId' style={{padding: "10px",
+              width: "100%",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              outline: "none",
+              backgroundColor: "#f5f5f5",
+              color: "black"}}></input>
             <button onClick={() => { setName("Nike Backpack"); setBrand("Nike"); setMaterial("cotton"); setWeight("5"); setColor("red") }} 
               style={{ backgroundColor: "#f0f0f0", color: "black", padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px", cursor: "pointer" }}>
               quickadd
