@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GET as getAll, POST as createBackpack } from '../../app/api/backpacks/route';
 import { GET as getById, PATCH as updateBackpack, DELETE as deleteBackpack } from '../../app/api/backpacks/[id]/route';
+import { GET as filterBackpacks } from '../../app/api/backpacks/filter/route';
+import { GET as sortBackpacks } from '../../app/api/backpacks/sort/route';
 import { backpackDb } from '../../app/api/db/backpackStore';
 import { createMockRequest } from '../../src/test-utils';
 import { beforeEach, describe } from 'node:test';
 
-// Reset database before EACH test
 beforeEach(() => {
-  // Completely reset the database to initial state
   backpackDb.resetDatabase();
 });
 
 describe('Backpacks API', () => {
-  // Test GET /api/backpacks
   describe('GET /api/backpacks', () => {
     test('should return all backpacks', async () => {
       const req = createMockRequest({ 
         method: 'GET',
         url: 'http://localhost:3000/api/backpacks' 
       });
-      
       const response = await getAll(req);
       const data = await response.json();
       
@@ -80,8 +78,6 @@ describe('Backpacks API', () => {
       expect(response.status).toBe(201);
       expect(data.id).toBeDefined();
       expect(data.name).toBe('Test Backpack');
-      
-      // Check it was added to the database
       const allBackpacks = backpackDb.getAll();
       expect(allBackpacks.length).toBe(4);
     });
@@ -91,18 +87,14 @@ describe('Backpacks API', () => {
         method: 'POST',
         url: 'http://localhost:3000/api/backpacks',
         body: {
-          // Missing required fields
-          name: 'Te',  // Too short
+          name: 'Te',
           material: 'Test Material'
         }
       });
-      
       const response = await createBackpack(req);
       const data = await response.json();
-      
       expect(response.status).toBe(400);
       expect(data.error).toBe('Validation error');
-      
       // Should not have added a backpack
       const allBackpacks = backpackDb.getAll();
       expect(allBackpacks.length).toBe(4);
@@ -226,7 +218,6 @@ describe('Backpacks API', () => {
       
       expect(response.status).toBe(204);
       
-      // Check it was deleted from the database
       const allBackpacks = backpackDb.getAll();
       expect(allBackpacks.length).toBe(3);
       expect(backpackDb.getById(backpackId)).toBeUndefined();
@@ -243,6 +234,73 @@ describe('Backpacks API', () => {
       
       expect(response.status).toBe(404);
       expect(data.error).toBe('Backpack not found');
+    });
+  });
+
+  // Test filter API
+  describe('GET /api/backpacks/filter', () => {
+    test('should filter backpacks by brand', async () => {
+      const req = createMockRequest({ 
+        method: 'GET',
+        url: 'http://localhost:3000/api/backpacks/filter?brand=OutdoorTech' 
+      });
+      
+      const response = await filterBackpacks(req);
+      const data = await response.json();
+      
+      expect(response.status).toBe(200);
+      expect(Array.isArray(data)).toBe(true);
+      expect(data.length).toBe(1);
+      expect(data[0].brand).toBe('OutdoorTech');
+    });
+    
+    test('should filter backpacks by multiple criteria', async () => {
+      const req = createMockRequest({ 
+        method: 'GET',
+        url: 'http://localhost:3000/api/backpacks/filter?material=Canvas&color=Black' 
+      });
+      
+      const response = await filterBackpacks(req);
+      const data = await response.json();
+      
+      expect(response.status).toBe(200);
+      expect(data.length).toBe(1);
+      expect(data[0].name).toBe('Urban Commuter');
+      expect(data[0].material).toBe('Canvas');
+      expect(data[0].color).toBe('Black');
+    });
+  });
+  
+  // Test sort API
+  describe('GET /api/backpacks/sort', () => {
+    test('should sort backpacks by weight in ascending order', async () => {
+      const req = createMockRequest({ 
+        method: 'GET',
+        url: 'http://localhost:3000/api/backpacks/sort?sortBy=weight&order=asc' 
+      });
+      
+      const response = await sortBackpacks(req);
+      const data = await response.json();
+      
+      expect(response.status).toBe(200);
+      expect(data.length).toBe(3);
+      expect(data[0].name).toBe('Urban Commuter'); // Lightest
+      expect(data[2].name).toBe('Explorer 45');    // Heaviest
+    });
+    
+    test('should sort backpacks by name in descending order', async () => {
+      const req = createMockRequest({ 
+        method: 'GET',
+        url: 'http://localhost:3000/api/backpacks/sort?sortBy=name&order=desc' 
+      });
+      
+      const response = await sortBackpacks(req);
+      const data = await response.json();
+      
+      expect(response.status).toBe(200);
+      expect(data.length).toBe(3);
+      expect(data[0].name).toBe('Urban Commuter'); // Alphabetically last
+      expect(data[2].name).toBe('Day Hiker');      // Alphabetically first
     });
   });
 }); 
