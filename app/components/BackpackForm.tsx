@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BackpackFormData, Backpack } from '../models/backpack';
+import { BackpackFormData, Backpack } from '../models/types';
 import { validateBackpackForm, ValidationError, hasErrors } from '../utils/validators';
 import { FaShoppingBag, FaTimes } from 'react-icons/fa';
 

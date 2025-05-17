@@ -1,6 +1,6 @@
 'use client';
 
-import { Backpack } from '../models/backpack';
+import { Backpack } from '../models/types';
 import { FaTrash, FaEdit, FaWeightHanging, FaShoppingBag } from 'react-icons/fa';
 import { MdOutlineBrandingWatermark } from 'react-icons/md';
 import { GiMaterialsScience } from 'react-icons/gi';

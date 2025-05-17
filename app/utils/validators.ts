@@ -1,4 +1,4 @@
-import { BackpackFormData } from '../models/backpack';
+import { BackpackFormData } from '../models/types';
 
 export type ValidationError = {
   [key in keyof BackpackFormData]?: string;

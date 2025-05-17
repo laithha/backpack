@@ -1,4 +1,4 @@
-import { Backpack, BackpackFormData } from './backpack';
+import { Backpack, BackpackFormData } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock in-memory data store

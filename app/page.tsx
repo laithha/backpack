@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Backpack, BackpackFormData } from './models/backpack';
+import { Backpack, BackpackFormData } from './models/types';
 import { backpackStore } from './models/store';
 import { CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
