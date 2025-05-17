@@ -56,7 +56,10 @@ export async function PATCH(
     // Update the backpack
     const updatedBackpack = backpackDb.updateBackpack(params.id, validationResult.data);
     
-    return NextResponse.json(updatedBackpack);
+    return NextResponse.json({
+      message: 'Backpack updated successfully',
+      backpack: updatedBackpack
+    });
   } catch (error) {
     console.error(`Error updating backpack with ID ${params.id}:`, error);
     return NextResponse.json(
@@ -85,7 +88,9 @@ export async function DELETE(
     const deleted = backpackDb.deleteBackpack(params.id);
     
     if (deleted) {
-      return new NextResponse(null, { status: 204 });
+      return NextResponse.json({
+        message: 'Backpack deleted successfully'
+      }, { status: 200 });
     } else {
       return NextResponse.json(
         { error: 'Failed to delete backpack' },

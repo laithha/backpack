@@ -6,7 +6,7 @@ import { Backpack, BackpackFormData } from './models/backpack';
 import { backpackStore } from './models/store';
 import { CSSProperties } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Home() {
   const [backpacks, setBackpacks] = useState<Backpack[]>([]);
@@ -45,7 +45,7 @@ export default function Home() {
     setBrand(backpack.brand);
     setMaterial(backpack.material);
     setWeight(String(backpack.weight));
-    setColor("");
+    setColor(backpack.color || "");
     setShowUpdateBackpack(true);
     setShowSelectUpdateModal(false);
   };
@@ -73,7 +73,8 @@ export default function Home() {
         name,
         brand,
         material,
-        weight: Number(weight)
+        weight: Number(weight),
+        color: color || undefined
       };
       
       backpackStore.updateBackpack(selectedBackpack, updatedData);
@@ -111,7 +112,8 @@ export default function Home() {
       name,
       brand,
       material,
-      weight: Number(weight)
+      weight: Number(weight),
+      color: color || undefined
     };
 
     backpackStore.addBackpack(newBackpack);
@@ -196,6 +198,7 @@ export default function Home() {
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", backgroundColor: "white" }}>
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <nav
         style={{
           width: "220px", height: "100vh", backgroundColor: "#1e1e2f",
@@ -443,7 +446,7 @@ export default function Home() {
                           <p><strong>Brand:</strong> {backpack.brand}</p>
                           <p><strong>Material:</strong> {backpack.material}</p>
                           <p><strong>Weight:</strong> {backpack.weight}g</p>
-                          <p><strong>Color:</strong> {color}</p>
+                          <p><strong>Color:</strong> {backpack.color || "color"}</p>
                         </div>
                       ))
                     }
@@ -679,7 +682,7 @@ export default function Home() {
                   <p><strong>Brand:</strong> {backpack.brand}</p>
                   <p><strong>Material:</strong> {backpack.material}</p>
                   <p><strong>Weight:</strong> {backpack.weight}g</p>
-                  <p><strong>Color:</strong> {color}</p>
+                  <p><strong>Color:</strong> {backpack.color || "color"}</p>
                 </div>
               ))
             )}

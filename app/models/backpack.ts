@@ -4,6 +4,7 @@ export interface Backpack {
   brand: string;
   material: string;
   weight: number; // weight in grams
+  color?: string; // Optional color field
   createdAt: Date;
 }
 

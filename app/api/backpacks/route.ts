@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
     // Create the backpack
     const newBackpack = backpackDb.addBackpack(validationResult.data);
     
-    return NextResponse.json(newBackpack, { status: 201 });
+    return NextResponse.json(
+      { 
+        message: 'Backpack created successfully', 
+        backpack: newBackpack 
+      }, 
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating backpack:', error);
     return NextResponse.json(
