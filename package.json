@@ -11,8 +11,10 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@types/pg": "^8.15.2",
     "@types/uuid": "^10.0.0",
     "next": "15.3.2",
+    "pg": "^8.16.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",

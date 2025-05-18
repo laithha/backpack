@@ -28,7 +28,8 @@ export default function BackpackForm({ initialData, onSubmit, onCancel, isEdit =
     name: false,
     brand: false,
     material: false,
-    weight: false
+    weight: false,
+    color:false
   });
 
   // Validate on form data change if field was touched
@@ -59,7 +60,8 @@ export default function BackpackForm({ initialData, onSubmit, onCancel, isEdit =
       name: true,
       brand: true,
       material: true,
-      weight: true
+      weight: true,
+      color:true
     });
     
     // Final validation
