@@ -1,21 +1,25 @@
 export const handleAddBackpack = async (
-name:string,
-brand:string,
-material:string,
-weight:number,
-color:string,
-manufactureId:number
+  name: string,
+  brand: string,
+  material: string,
+  weight: number,
+  color: string,
+  manufactureId: number
 ) => {
-    // validations
-    const newBackpack = {
-        name,
-        brand,
-        material,
-        weight,
-        color,
-        manufactureId
-    }
-     try {
+  if (!name || !brand || !material || !weight || !color || !manufactureId) {
+    throw new Error("Required fields are missing");
+  }
+
+  const newBackpack = {
+    name,
+    brand,
+    material,
+    weight,
+    color,
+    manufactureId
+  };
+
+  try {
     const response = await fetch("/api/backpacks", {
       method: "POST",
       headers: {
@@ -24,13 +28,18 @@ manufactureId:number
       body: JSON.stringify(newBackpack),
     });
 
+    const data = await response.json();
+    
     if (!response.ok) {
-      throw new Error("Failed to add backpack");
+      // Handle specific error responses from the API
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      throw new Error(`Failed to add backpack: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data; 
+    return data;
   } catch (error: any) {
     throw new Error(error.message);
   }
-    }
+};

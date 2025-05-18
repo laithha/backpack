@@ -54,24 +54,30 @@ export default function Home() {
   };
 
   const handleUpdate = () => {
-    if(!isNumber(weight)){
-      toast.error("Weight must be a number!");
+    // Input validation with error notifications
+    if (!name || name.length < 3) {
+      toast.error("Name must be at least 3 characters long");
       return;
     }
-    if(name.length < 3){
-      toast.error("The name is too short! It must be at least 3 letters");
+    if (!brand || brand.length < 3) {
+      toast.error("Brand must be at least 3 characters long");
       return;
     }
-    if(brand.length < 3){
-      toast.error("The brand is too short, it must be at least 3 letters");
+    if (!material || material.length < 3) {
+      toast.error("Material must be at least 3 characters long");
       return;
     }
-    if(material.length < 3){
-      toast.error("The material is too short, it must be at least 3 letters");
+    if (!weight || !isNumber(weight)) {
+      toast.error("Weight must be a valid number");
       return;
     }
 
-    if (selectedBackpack) {
+    if (!selectedBackpack) {
+      toast.error("No backpack selected for update");
+      return;
+    }
+
+    try {
       const updatedData: BackpackFormData = {
         name,
         brand,
@@ -79,22 +85,55 @@ export default function Home() {
         weight: Number(weight)
       };
       
-      backpackStore.updateBackpack(selectedBackpack, updatedData);
-      loadBackpacks();
-      setName("");
-      setBrand("");
-      setMaterial("");
-      setWeight("");
-      setColor("");
-      setSelectedBackpack(null);
-      setShowUpdateBackpack(false);
-      toast.success(`${name} updated successfully!`);
+      const result = backpackStore.updateBackpack(selectedBackpack, updatedData);
+      
+      if (result) {
+        loadBackpacks();
+        setName("");
+        setBrand("");
+        setMaterial("");
+        setWeight("");
+        setColor("");
+        setSelectedBackpack(null);
+        setShowUpdateBackpack(false);
+        toast.success(`${name} updated successfully!`);
+      } else {
+        toast.error(`Failed to update backpack`);
+      }
+    } catch (error: any) {
+      console.error("Error updating backpack:", error);
+      toast.error(`Error: ${error.message || "Unknown error occurred during update"}`);
     }
   };
 
   const handleAdd = async () => {
-    try{
-        console.log("hello1")
+    try {
+        // Input validation
+        if (name.length < 3) {
+            toast.error("Name must be at least 3 characters long");
+            return;
+        }
+        if (brand.length < 3) {
+            toast.error("Brand must be at least 3 characters long");
+            return;
+        }
+        if (material.length < 3) {
+            toast.error("Material must be at least 3 characters long");
+            return;
+        }
+        if (!weight || !isNumber(weight)) {
+            toast.error("Weight must be a valid number");
+            return;
+        }
+        if (!manufactureId || !isNumber(manufactureId)) {
+            toast.error("Please select a valid manufacturer ID");
+            return;
+        }
+        if (!color) {
+            toast.error("Please specify a color");
+            return;
+        }
+
         const newBackpack = await handleAddBackpack(
             name,
             brand,
@@ -102,27 +141,69 @@ export default function Home() {
             parseFloat(weight),
             color,
             parseInt(manufactureId)
-        )
-        console.log("hello2")
-        if(!newBackpack){
-            toast.error("Failed to add a backpack")
+        );
+        
+        if (!newBackpack) {
+            toast.error("Failed to add backpack");
             return;
         }
-        console.log("hello3")
-    }
-    catch(error:any){
-        console.log("error message", error.message)
+        
+        // Clear form fields first
+        setName("");
+        setBrand("");
+        setMaterial("");
+        setWeight("");
+        setColor("");
+        setManufactureId("");
+        
+        // Close the modal
+        setShowAddModal(false);
+        
+        // Refresh list
+        loadBackpacks();
+        
+        // Show success message after modal is closed
+        toast.success(`Backpack "${name}" added successfully!`);
+        
+        // Show the backpack list
+        setShowListBackpack(true);
+    } catch (error: any) {
+        if (error.message.includes("already exists")) {
+            toast.error(`A backpack with this name already exists`);
+        } else if (error.message.includes("Required fields")) {
+            toast.error("Please fill in all required fields");
+        } else {
+            toast.error(`Error: ${error.message}`);
+        }
+        console.error("Error adding backpack:", error);
     }
 };
 
   const handleDeleteBackpack = () => {
-    if (selectedBackpack) {
-      backpackStore.deleteBackpack(selectedBackpack);
-      loadBackpacks();
-      setSelectedBackpack(null);
-      setShowConfirmModal(false);
-      setShowDeleteModal(false);
-      toast.success("Backpack deleted successfully!");
+    if (!selectedBackpack) {
+      toast.error("No backpack selected for deletion");
+      return;
+    }
+     
+    try {
+      // Get the backpack name before deletion for the success message
+      const backpackToDelete = backpacks.find(bp => bp.id === selectedBackpack);
+      const backpackName = backpackToDelete ? backpackToDelete.name : 'Backpack';
+      
+      const result = backpackStore.deleteBackpack(selectedBackpack);
+      
+      if (result) {
+        loadBackpacks();
+        setSelectedBackpack(null);
+        setShowConfirmModal(false);
+        setShowDeleteModal(false);
+        toast.success(`${backpackName} deleted successfully!`);
+      } else {
+        toast.error(`Failed to delete ${backpackName}`);
+      }
+    } catch (error: any) {
+      console.error("Error deleting backpack:", error);
+      toast.error(`Error: ${error.message || "Unknown error occurred during deletion"}`);
     }
   };
 

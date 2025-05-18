@@ -1,6 +1,4 @@
-import { ErrorMessages } from "@/enums/ErrorMessages";
 import { NextResponse } from "next/server";
-import { manufactures } from "@/app/models/types";
 import { Pool } from "pg";
 
 const pool = new Pool({
@@ -79,16 +77,16 @@ export async function POST(request: Request) {
         );
       }
   
-      const checkIfManufacturerExistsQuery = `
+      const checkIfmanufacturesExistsQuery = `
         SELECT * FROM manufactures WHERE id=$1
       `;
-      const paramsForCheckingManufacturerExistence = [id];
-      const manufacturerExist = await pool.query(
-        checkIfManufacturerExistsQuery,
-        paramsForCheckingManufacturerExistence
+      const paramsForCheckingmanufacturesExistence = [id];
+      const manufacturesExist = await pool.query(
+        checkIfmanufacturesExistsQuery,
+        paramsForCheckingmanufacturesExistence
       );
   
-      if (manufacturerExist.rows.length === 0) {
+      if (manufacturesExist.rows.length === 0) {
         return NextResponse.json(
           { error: `Manufacturer with ID ${id} does not exist.` },
           { status: 404 }
@@ -118,11 +116,10 @@ export async function POST(request: Request) {
   
       if (!name) {
         return NextResponse.json(
-          { error: "Bad request: Manufacturer name is required" },
+          { error: "Bad request: manufacture name is required" },
           { status: 400 }
         );
       }
-  
       const checkIfManufacturerExistsQuery = `
         SELECT * FROM manufactures WHERE name=$1
       `;
@@ -131,14 +128,12 @@ export async function POST(request: Request) {
         checkIfManufacturerExistsQuery,
         paramsForCheckingManufacturerExistence
       );
-  
       if (manufacturerExist.rows.length === 0) {
         return NextResponse.json(
-          { error: `Manufacturer with name ${name} does not exist.` },
+          { error: `Manufacture with name ${name} does not exist.` },
           { status: 404 }
         );
       }
-  
       const query = `
         DELETE FROM manufactures WHERE name = $1 RETURNING *;
       `;
