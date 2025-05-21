@@ -446,7 +446,7 @@ export default function Home() {
               style={{ backgroundColor: "#f0f0f0", color: "black", padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px", cursor: "pointer" }}>
               quickadd
             </button>
-            <button onClick={handleAdd} style={{ backgroundColor: "green", color: "white", padding: "10px 20px", border: "none", borderRadius: "8px", cursor: "pointer" }}>Add</button>
+            <button onClick={()=>{handleAdd(); setShowAddModal(false)}} style={{ backgroundColor: "green", color: "white", padding: "10px 20px", border: "none", borderRadius: "8px", cursor: "pointer" }}>Add</button>
             <button onClick={() => setShowAddModal(false)} style={cancelButton}>Close</button>
           </div>
         )}
