@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     let query = 'SELECT * FROM backpacks';
     const queryParams: any[] = [];
     const conditions: string[] = [];
-
+//ssh -i "C:\Users\esmai\Downloads\laith-key.pem" ec2-user@16.16.196.94
     // Add filtering conditions
     if (brand) {
       conditions.push(`brand ILIKE $${queryParams.length + 1}`);
