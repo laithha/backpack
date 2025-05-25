@@ -16,7 +16,9 @@ services:
       context: .
     container_name: mpp-webb-main
     environment:
-      DATABASE_URL: postgresql://admin:admin@postgres:5433/backpack
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/backpack
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      SESSION_SECRET: your-super-secret-session-key-change-this-in-production
     ports:
       - "3000:3000"
     depends_on:

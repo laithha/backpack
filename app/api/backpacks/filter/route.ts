@@ -9,11 +9,7 @@ const pool = new Pool({
   password: 'admin',      
   port: 5432,
 });
-//http://localhost:3000/api/backpacks/filter?sortBy=name&sortOrder=ASC GET BY ASCENDING ORDER ALPHABETICALLY
-//http://localhost:3000/api/backpacks/filter?sortBy=name&sortOrder=DESC GET BY DESCENDING ORDER ALPHABETICALLY
-//http://localhost:3000/api/backpacks/filter?material=cotton GET BY MATERIAL
-//http://localhost:3000/api/backpacks/filter?minWeight=10&maxWeight=20 GET BY WEIGHT RANGE
-//http://localhost:3000/api/backpacks/filter?brand=Nike FILTER BY BRAND
+
 export async function GET(request: NextRequest) {
   try {
     // Get query parameters

@@ -11,19 +11,25 @@ class BackpackStore {
       name: 'Explorer 45',
       brand: 'OutdoorTech',
       material: 'Nylon',
-      weight: 1200
+      weight: 1200,
+      color: 'Green',
+      manufactureId: 1
     });
     this.addBackpack({
       name: 'Day Hiker',
       brand: 'MountainLife',
       material: 'Polyester',
-      weight: 850
+      weight: 850,
+      color: 'Blue',
+      manufactureId: 2
     });
     this.addBackpack({
       name: 'Urban Commuter',
       brand: 'CityGear',
       material: 'Canvas',
-      weight: 700
+      weight: 700,
+      color: 'Black',
+      manufactureId: 3
     });
   }
 

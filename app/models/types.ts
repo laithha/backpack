@@ -4,6 +4,8 @@ export interface Backpack {
   brand: string;
   material: string;
   weight: number; 
+  color: string;
+  manufactureId: number;
   createdAt: Date;
 }
 

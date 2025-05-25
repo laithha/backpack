@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Backpack, BackpackFormData } from './models/types';
 import { backpackStore } from './models/store';
 import { CSSProperties } from 'react';
@@ -11,6 +12,9 @@ import { parse } from 'path';
 import { handleAddBackpack } from '@/helpers/helpers';
 
 export default function Home() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [backpacks, setBackpacks] = useState<Backpack[]>([]);
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
@@ -29,12 +33,36 @@ export default function Home() {
   const [showFilterModal, setShowFilterModal] = useState(false);
 
   useEffect(() => {
+    // Check authentication first
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    
+    setIsAuthenticated(true);
+    setIsLoading(false);
     loadBackpacks();
-  }, []);
+  }, [router]);
 
-  const loadBackpacks = () => {
-    const allBackpacks = backpackStore.getAll();
-    setBackpacks(allBackpacks);
+  const loadBackpacks = async () => {
+    try {
+      const response = await fetch('/api/backpacks');
+      if (response.ok) {
+        const data = await response.json();
+        setBackpacks(data);
+        // Only show success message on manual refresh, not on initial load
+        if (backpacks.length > 0) {
+          toast.success(`Loaded ${data.length} backpack${data.length !== 1 ? 's' : ''}`);
+        }
+      } else {
+        console.error('Failed to load backpacks');
+        toast.error('Failed to load backpacks from database');
+      }
+    } catch (error) {
+      console.error('Error loading backpacks:', error);
+      toast.error('Error connecting to database');
+    }
   };
 
   // Helper function to check if a string is a number
@@ -44,16 +72,17 @@ export default function Home() {
 
   const handleSelectBackpackForUpdate = (backpack: Backpack) => {
     setSelectedBackpack(backpack.id);
-    setName(backpack.name);
-    setBrand(backpack.brand);
-    setMaterial(backpack.material);
-    setWeight(String(backpack.weight));
-    setColor("");
+    setName(backpack.name || "");
+    setBrand(backpack.brand || "");
+    setMaterial(backpack.material || "");
+    setWeight(String(backpack.weight || ""));
+    setColor(backpack.color || "");
+    setManufactureId(String(backpack.manufactureId || ""));
     setShowUpdateBackpack(true);
     setShowSelectUpdateModal(false);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     // Input validation with error notifications
     if (!name || name.length < 3) {
       toast.error("Name must be at least 3 characters long");
@@ -71,6 +100,14 @@ export default function Home() {
       toast.error("Weight must be a valid number");
       return;
     }
+    if (!color) {
+      toast.error("Please specify a color");
+      return;
+    }
+    if (!manufactureId || !isNumber(manufactureId)) {
+      toast.error("Please select a valid manufacturer");
+      return;
+    }
 
     if (!selectedBackpack) {
       toast.error("No backpack selected for update");
@@ -78,17 +115,31 @@ export default function Home() {
     }
 
     try {
-      const updatedData: BackpackFormData = {
+      // Show loading message
+      const loadingToast = toast.loading("Updating backpack...");
+      
+      // Store name for success message
+      const backpackName = name;
+
+      const updatedData = {
         name,
         brand,
         material,
-        weight: Number(weight)
+        weight: Number(weight),
+        color,
+        manufactureId: Number(manufactureId)
       };
       
-      const result = backpackStore.updateBackpack(selectedBackpack, updatedData);
-      
-      if (result) {
-        loadBackpacks();
+      const response = await fetch('/api/backpacks', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        // Clear form and close modal
         setName("");
         setBrand("");
         setMaterial("");
@@ -96,13 +147,19 @@ export default function Home() {
         setColor("");
         setSelectedBackpack(null);
         setShowUpdateBackpack(false);
-        toast.success(`${name} updated successfully!`);
+        
+        // Refresh list
+        await loadBackpacks();
+        
+        // Show success message
+        toast.success(`Backpack "${backpackName}" updated successfully!`, { id: loadingToast });
       } else {
-        toast.error(`Failed to update backpack`);
+        const errorData = await response.json();
+        toast.error(`Failed to update backpack: ${errorData.error || 'Unknown error'}`, { id: loadingToast });
       }
     } catch (error: any) {
       console.error("Error updating backpack:", error);
-      toast.error(`Error: ${error.message || "Unknown error occurred during update"}`);
+      toast.error(`Error updating backpack: ${error.message || "Unknown error occurred"}`);
     }
   };
 
@@ -134,6 +191,12 @@ export default function Home() {
             return;
         }
 
+        // Show loading message
+        const loadingToast = toast.loading("Adding backpack...");
+
+        // Store name before clearing form
+        const backpackName = name;
+
         const newBackpack = await handleAddBackpack(
             name,
             brand,
@@ -144,11 +207,11 @@ export default function Home() {
         );
         
         if (!newBackpack) {
-            toast.error("Failed to add backpack");
+            toast.error("Failed to add backpack", { id: loadingToast });
             return;
         }
         
-        // Clear form fields first
+        // Clear form fields
         setName("");
         setBrand("");
         setMaterial("");
@@ -160,26 +223,29 @@ export default function Home() {
         setShowAddModal(false);
         
         // Refresh list
-        loadBackpacks();
+        await loadBackpacks();
         
-        // Show success message after modal is closed
-        toast.success(`Backpack "${name}" added successfully!`);
+        // Show success message
+        toast.success(`Backpack "${backpackName}" added successfully!`, { id: loadingToast });
         
         // Show the backpack list
         setShowListBackpack(true);
     } catch (error: any) {
+        console.error("Error adding backpack:", error);
+        
         if (error.message.includes("already exists")) {
             toast.error(`A backpack with this name already exists`);
         } else if (error.message.includes("Required fields")) {
             toast.error("Please fill in all required fields");
+        } else if (error.message.includes("column") && error.message.includes("does not exist")) {
+            toast.error("Database error: Missing column. Please add the 'color' column to your database.");
         } else {
-            toast.error(`Error: ${error.message}`);
+            toast.error(`Error adding backpack: ${error.message}`);
         }
-        console.error("Error adding backpack:", error);
     }
 };
 
-  const handleDeleteBackpack = () => {
+  const handleDeleteBackpack = async () => {
     if (!selectedBackpack) {
       toast.error("No backpack selected for deletion");
       return;
@@ -190,20 +256,35 @@ export default function Home() {
       const backpackToDelete = backpacks.find(bp => bp.id === selectedBackpack);
       const backpackName = backpackToDelete ? backpackToDelete.name : 'Backpack';
       
-      const result = backpackStore.deleteBackpack(selectedBackpack);
+      // Show loading message
+      const loadingToast = toast.loading(`Deleting ${backpackName}...`);
       
-      if (result) {
-        loadBackpacks();
+      const response = await fetch('/api/backpacks', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: backpackName }),
+      });
+      
+      if (response.ok) {
+        // Clear selection and close modals
         setSelectedBackpack(null);
         setShowConfirmModal(false);
         setShowDeleteModal(false);
-        toast.success(`${backpackName} deleted successfully!`);
+        
+        // Refresh list
+        await loadBackpacks();
+        
+        // Show success message
+        toast.success(`${backpackName} deleted successfully!`, { id: loadingToast });
       } else {
-        toast.error(`Failed to delete ${backpackName}`);
+        const errorData = await response.json();
+        toast.error(`Failed to delete ${backpackName}: ${errorData.error || 'Unknown error'}`, { id: loadingToast });
       }
     } catch (error: any) {
       console.error("Error deleting backpack:", error);
-      toast.error(`Error: ${error.message || "Unknown error occurred during deletion"}`);
+      toast.error(`Error deleting backpack: ${error.message || "Unknown error occurred"}`);
     }
   };
 
@@ -214,6 +295,11 @@ export default function Home() {
     setShowListBackpack(false);
     setShowSelectUpdateModal(false);
     setShowFilterModal(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    router.push('/login');
   };
 
   const modalStyle: CSSProperties = {
@@ -264,6 +350,15 @@ export default function Home() {
     borderRadius: "12px",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", height: "100vh", width: "100vw", backgroundColor: "white", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontSize: "18px", color: "black" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", backgroundColor: "white" }}>
@@ -364,6 +459,20 @@ export default function Home() {
         }}>
           Sort by weight decreasing
         </button>
+        <Link href="/settings" style={{
+          background: "#2c2c3e", color: "white", textDecoration: "none",
+          padding: "10px 15px", width: "100%", borderRadius: "8px", cursor: "pointer",
+          textAlign: "center", display: "block"
+        }}>
+          Settings
+        </Link>
+        <button onClick={handleLogout} style={{
+          background: "#dc3545", color: "white", border: "none",
+          padding: "10px 15px", width: "100%", borderRadius: "8px", cursor: "pointer",
+          marginTop: "20px"
+        }}>
+          Logout
+        </button>
       </nav>
 
       <div style={{ marginLeft: "220px", padding: "20px", flex: 1, overflowY: "auto", backgroundColor: "white", color: "black" }}>
@@ -378,7 +487,7 @@ export default function Home() {
             width: "350px", color: "black"
           }}> 
             <h3>Add Backpack</h3>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={{
+            <input type="text" value={name || ""} onChange={(e) => setName(e.target.value)} placeholder="Name" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -387,7 +496,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Brand" style={{
+            <input type="text" value={brand || ""} onChange={(e) => setBrand(e.target.value)} placeholder="Brand" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -396,7 +505,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={{
+            <input type="text" value={material || ""} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -405,7 +514,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" style={{
+            <input type="text" value={weight || ""} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -414,7 +523,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={{
+            <input type="text" value={color || ""} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -423,7 +532,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type='text' value={manufactureId} onChange={(e) => setManufactureId(e.target.value)} placeholder='manufatureId' style={{padding: "10px",
+            <input type='text' value={manufactureId || ""} onChange={(e) => setManufactureId(e.target.value)} placeholder='manufatureId' style={{padding: "10px",
               width: "100%",
               borderRadius: "6px",
               border: "1px solid #ccc",
@@ -521,7 +630,8 @@ export default function Home() {
                           <p><strong>Brand:</strong> {backpack.brand}</p>
                           <p><strong>Material:</strong> {backpack.material}</p>
                           <p><strong>Weight:</strong> {backpack.weight}g</p>
-                          <p><strong>Color:</strong> {color}</p>
+                          <p><strong>Color:</strong> {backpack.color}</p>
+                          <p><strong>Manufacturer ID:</strong> {backpack.manufactureId}</p>
                         </div>
                       ))
                     }
@@ -611,7 +721,7 @@ export default function Home() {
             color: "black"
           }}>
             <h3>Update Backpack</h3>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={{
+            <input type="text" value={name || ""} onChange={(e) => setName(e.target.value)} placeholder="Name" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -620,7 +730,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Brand" style={{
+            <input type="text" value={brand || ""} onChange={(e) => setBrand(e.target.value)} placeholder="Brand" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -629,7 +739,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={{
+            <input type="text" value={material || ""} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -638,7 +748,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" style={{
+            <input type="text" value={weight || ""} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -647,7 +757,7 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
-            <input type="text" value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={{
+            <input type="text" value={color || ""} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={{
               padding: "10px",
               width: "100%",
               borderRadius: "6px",
@@ -656,6 +766,21 @@ export default function Home() {
               backgroundColor: "#f5f5f5",
               color: "black"
             }} />
+            <select value={manufactureId || ""} onChange={(e) => setManufactureId(e.target.value)} style={{
+              padding: "10px",
+              width: "100%",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              outline: "none",
+              backgroundColor: "#f5f5f5",
+              color: "black"
+            }}>
+              <option value="">Select Manufacturer</option>
+              <option value="1">Nike</option>
+              <option value="2">Adidas</option>
+              <option value="3">Puma</option>
+              <option value="4">Reebok</option>
+            </select>
             <button onClick={handleUpdate} style={confirmButton}>Update</button>
             <button onClick={() => setShowUpdateBackpack(false)} style={cancelButton}>Close</button>
           </div>
@@ -694,6 +819,7 @@ export default function Home() {
                   <div key={index} onClick={() => {
                     setSelectedBackpack(backpack.id);
                     setShowConfirmModal(true);
+                    toast.success(`Selected "${backpack.name}" for deletion`);
                   }} style={{
                     backgroundColor: "#f0f0f0", 
                     padding: "10px",
@@ -730,7 +856,10 @@ export default function Home() {
           }}>
             <h3>Are you sure you want to delete this backpack?</h3>
             <button onClick={handleDeleteBackpack} style={confirmButton}>Yes, Delete</button>
-            <button onClick={() => setShowConfirmModal(false)} style={cancelButton}>Cancel</button>
+            <button onClick={() => {
+              setShowConfirmModal(false);
+              toast.success("Deletion cancelled");
+            }} style={cancelButton}>Cancel</button>
           </div>
         )}
         
@@ -757,7 +886,8 @@ export default function Home() {
                   <p><strong>Brand:</strong> {backpack.brand}</p>
                   <p><strong>Material:</strong> {backpack.material}</p>
                   <p><strong>Weight:</strong> {backpack.weight}g</p>
-                  <p><strong>Color:</strong> {color}</p>
+                  <p><strong>Color:</strong> {backpack.color}</p>
+                  <p><strong>Manufacturer ID:</strong> {backpack.manufactureId}</p>
                 </div>
               ))
             )}

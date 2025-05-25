@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
     try {
       const body = await request.json();
-      const { name, brand, material, weight, manufactureId } = body;
+      const { name, brand, material, weight, color, manufactureId } = body;
       const createdAt = "2025-05-14T16:39:33.845Z";
-      if (!name || !brand || !material || !weight || name.length < 3 || !isNumber(weight) || !isNumber(manufactureId)) {
+      if (!name || !brand || !material || !weight || !color || name.length < 3 || !isNumber(weight) || !isNumber(manufactureId)) {
         return NextResponse.json(
           { error: 'Bad request: Either null fields or invalid data' },
           { status: 400 }
@@ -48,11 +48,11 @@ export async function POST(request: Request) {
       }
 
       const query = `
-        INSERT INTO backpacks (name, brand, material, weight, "createdAt", "manufactureId")
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO backpacks (name, brand, material, weight, color, "createdAt", "manufactureId")
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *;
       `;
-      const values = [name, brand, material, weight, createdAt || null, manufactureId];
+      const values = [name, brand, material, weight, color, createdAt || null, manufactureId];
       const res = await pool.query(query, values);
   
       return NextResponse.json(res.rows[0], { status: 201 });
@@ -65,9 +65,9 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { name, brand, material, weight, createdAt, manufactureId } = body;
+    const { name, brand, material, weight, color, manufactureId } = body;
 
-    if (!name || !brand || !material || !weight || name.length < 3 || !isNumber(weight) || !isNumber(manufactureId)) {
+    if (!name || !brand || !material || !weight || !color || name.length < 3 || !isNumber(weight) || !isNumber(manufactureId)) {
      return NextResponse.json(
          { error: 'Bad request: Either null fields or invalid data' },
        { status: 400 }
@@ -86,11 +86,11 @@ export async function PUT(request: Request) {
     }
     const query = `
       UPDATE backpacks 
-      SET brand = $2, material = $3, weight = $4, "createdAt" = $5, "manufactureId" = $6
+      SET brand = $2, material = $3, weight = $4, color = $5, "manufactureId" = $6
       WHERE name = $1
       RETURNING *;
     `;
-    const values = [name, brand, material, weight, createdAt || null, manufactureId];
+    const values = [name, brand, material, weight, color, manufactureId];
     const res = await pool.query(query, values);
     return NextResponse.json(res.rows[0], { status: 201 });
   } catch (error) {
