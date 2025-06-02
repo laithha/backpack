@@ -1,0 +1,10 @@
+FROM node:18
+
+WORKDIR /src
+
+# Just test if we can build without copying files
+RUN echo "Docker build test successful"
+
+EXPOSE 3000
+
+CMD ["echo", "Test container running"] 
