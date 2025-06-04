@@ -86,8 +86,8 @@ export default function SettingsPage() {
             Account Settings
           </h1>
 
-          {/* Settings Grid - Centered single card */}
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          {/* Settings Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
             
             {/* Security Settings Card */}
             <Link href="/settings/2fa" style={{ textDecoration: "none" }}>
@@ -98,8 +98,7 @@ export default function SettingsPage() {
                 padding: "32px",
                 cursor: "pointer",
                 transition: "transform 0.2s, box-shadow 0.2s",
-                border: "1px solid #e5e7eb",
-                width: "400px"
+                border: "1px solid #e5e7eb"
               }}
               onMouseOver={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
@@ -132,6 +131,101 @@ export default function SettingsPage() {
                 </div>
               </div>
             </Link>
+
+            {/* Account Information Card */}
+            <div style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              padding: "32px",
+              border: "1px solid #e5e7eb"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{
+                  width: "48px", height: "48px", backgroundColor: "#f3e8ff", borderRadius: "12px",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginRight: "16px"
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "20px", fontWeight: "600", color: "black", margin: 0 }}>
+                    Account Information
+                  </h3>
+                </div>
+              </div>
+              <p style={{ color: "#6b7280", fontSize: "16px", lineHeight: "1.5", margin: 0 }}>
+                View and update your account details, email, and personal information.
+              </p>
+              <div style={{ marginTop: "16px", color: "#6b7280", fontSize: "14px" }}>
+                Coming soon...
+              </div>
+            </div>
+
+            {/* Preferences Card */}
+            <div style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              padding: "32px",
+              border: "1px solid #e5e7eb"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{
+                  width: "48px", height: "48px", backgroundColor: "#ecfdf5", borderRadius: "12px",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginRight: "16px"
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#10b981" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "20px", fontWeight: "600", color: "black", margin: 0 }}>
+                    Preferences
+                  </h3>
+                </div>
+              </div>
+              <p style={{ color: "#6b7280", fontSize: "16px", lineHeight: "1.5", margin: 0 }}>
+                Customize your app experience, notifications, and display preferences.
+              </p>
+              <div style={{ marginTop: "16px", color: "#6b7280", fontSize: "14px" }}>
+                Coming soon...
+              </div>
+            </div>
+
+            {/* Data & Privacy Card */}
+            <div style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              padding: "32px",
+              border: "1px solid #e5e7eb"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{
+                  width: "48px", height: "48px", backgroundColor: "#fef3c7", borderRadius: "12px",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginRight: "16px"
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#f59e0b" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "20px", fontWeight: "600", color: "black", margin: 0 }}>
+                    Data & Privacy
+                  </h3>
+                </div>
+              </div>
+              <p style={{ color: "#6b7280", fontSize: "16px", lineHeight: "1.5", margin: 0 }}>
+                Control your data, privacy settings, and manage what information is shared.
+              </p>
+              <div style={{ marginTop: "16px", color: "#6b7280", fontSize: "14px" }}>
+                Coming soon...
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
