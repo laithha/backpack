@@ -32,8 +32,8 @@ A modern web application for managing your backpack collection. Built with Next.
 
 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/backpack-manager.git
-cd backpack-manager
+git clone https://github.com/laithha/backpack.git
+cd backpack
 ```
 
 2. Install dependencies
