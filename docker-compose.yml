@@ -10,6 +10,10 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: unless-stopped
+
   web:
     image: node:18
     build:
@@ -19,12 +23,40 @@ services:
       DATABASE_URL: postgresql://admin:admin@postgres:5432/backpack
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
       SESSION_SECRET: your-super-secret-session-key-change-this-in-production
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: https://localhost
     volumes:
       - ./:/src
       - /src/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    restart: unless-stopped
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: mpp-nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl/certs/server.crt:/etc/nginx/ssl/server.crt:ro
+      - ./ssl/private/server.key:/etc/nginx/ssl/server.key:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - web
+    networks:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  nginx_logs:
+
+networks:
+  backend:
+    driver: bridge
